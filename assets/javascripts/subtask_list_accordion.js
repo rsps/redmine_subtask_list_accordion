@@ -34,7 +34,7 @@ function seletedTreeOpen()
     childlen.show().filter(".haschild").removeClass("collapse").addClass("expand");
     parentTR.removeClass("collapse").addClass("expand");
   }
-}h
+}
 
 function seletedTreeClose()
 {
