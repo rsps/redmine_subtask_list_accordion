@@ -6,19 +6,21 @@ module RedmineSubtaskListAccordion
       extend ActiveSupport::Concern
 
       #wrap original method
+      #Changed: Now includes modified original method, to add start_date and due_date to subtasks
       #Todo: These should be refactored away. See https://stackoverflow.com/questions/59041480/improving-on-hacky-ruby-method-alias-fix-for-conflicting-redmine-plugins
       included do
-        alias_method :render_descendants_tree_original, :render_descendants_tree
+        #alias_method :render_descendants_tree_original, :render_descendants_tree
         alias_method :render_descendants_tree, :switch_render_descendants_tree
         alias_method :sla_use_css, :sla_use_css
-        alias_method :switch_render_descendants_tree, :switch_render_descendants_tree
-        alias_method :render_descendants_tree_accordion, :render_descendants_tree_accordion
+        #alias_method :switch_render_descendants_tree, :switch_render_descendants_tree
+        #alias_method :render_descendants_tree_original, :render_descendants_tree_original
+        #alias_method :render_descendants_tree_accordion, :render_descendants_tree_accordion
         alias_method :expand_tree_at_first?,  :expand_tree_at_first?
         alias_method :sla_has_grandson_issues?, :sla_has_grandson_issues?
         alias_method :subtask_tree_client_processing?, :subtask_tree_client_processing?
-        alias_method :subtask_list_accordion_tree_render_32?, :subtask_list_accordion_tree_render_32?
-        alias_method :subtask_list_accordion_tree_render_33?, :subtask_list_accordion_tree_render_33?
-        alias_method :subtask_list_accordion_tree_render_34?, :subtask_list_accordion_tree_render_34?
+        #alias_method :subtask_list_accordion_tree_render_32?, :subtask_list_accordion_tree_render_32?
+        #alias_method :subtask_list_accordion_tree_render_33?, :subtask_list_accordion_tree_render_33?
+        #alias_method :subtask_list_accordion_tree_render_34?, :subtask_list_accordion_tree_render_34?
       end
 
       #switch by enable condition
@@ -28,6 +30,26 @@ module RedmineSubtaskListAccordion
         else
           render_descendants_tree_original(issue)
         end
+      end
+
+      def render_descendants_tree_original(issue)
+        s = '<table class="list issues odd-even">'
+        issue_list(issue.descendants.visible.preload(:status, :priority, :tracker, :assigned_to).sort_by(&:lft)) do |child, level|
+          css = "issue issue-#{child.id} hascontextmenu #{child.css_classes}"
+          css << " idnt idnt-#{level}" if level > 0
+          s << content_tag('tr',
+                 content_tag('td', check_box_tag("ids[]", child.id, false, :id => nil), :class => 'checkbox') +
+                 content_tag('td', link_to_issue(child, :project => (issue.project_id != child.project_id)), :class => 'subject', :style => 'width: 50%') +
+                 content_tag('td', h(child.status), :class => 'status') +
+                 content_tag('td', link_to_user(child.assigned_to), :class => 'assigned_to') +
+                 content_tag('td', child.start_date, :class => 'start_date') +
+                 content_tag('td', child.due_date, :class => 'due_date') +
+                 content_tag('td', child.disabled_core_fields.include?('done_ratio') ? '' : progress_bar(child.done_ratio), :class=> 'done_ratio') +
+                 content_tag('td', link_to_context_menu, :class => 'buttons'),
+                 :class => css)
+        end
+        s << '</table>'
+        s.html_safe
       end
 
       # add method to IssuesHelper
