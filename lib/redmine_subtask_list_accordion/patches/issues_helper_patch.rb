@@ -1,4 +1,4 @@
-require_dependency("issues_helper")
+#require 'issues_helper'
 
 module RedmineSubtaskListAccordion
   module Patches
@@ -144,3 +144,6 @@ module RedmineSubtaskListAccordion
     end
   end
 end
+
+IssuesController.send :helper, RedmineSubtaskListAccordion::Patches::IssuesHelperPatch
+

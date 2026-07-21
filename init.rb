@@ -1,9 +1,9 @@
 require_relative './lib/redmine_subtask_list_accordion/hooks/subtask_list_accordion_hook'
-require_relative './lib/redmine_subtask_list_accordion/patches/issues_helper_patch'
+#require_relative './lib/redmine_subtask_list_accordion/patches/issues_helper_patch'
 require_relative './lib/redmine_subtask_list_accordion/patches/user_preference_patch'
 
-#reloader = defined?(ActiveSupport::Reloader) ? ActiveSupport::Reloader : ActionDispatch::Reloader
-#ActiveSupport::Reloader.to_prepare do
+reloader = defined?(ActiveSupport::Reloader) ? ActiveSupport::Reloader : ActionDispatch::Reloader
+reloader.to_prepare do
   unless UserPreference.included_modules.include?(RedmineSubtaskListAccordion::Patches::UserPreferencePatch)
     UserPreference.send :prepend, RedmineSubtaskListAccordion::Patches::UserPreferencePatch
   end
@@ -11,7 +11,7 @@ require_relative './lib/redmine_subtask_list_accordion/patches/user_preference_p
   unless IssuesHelper.included_modules.include?(RedmineSubtaskListAccordion::Patches::IssuesHelperPatch)
     IssuesHelper.send :include, RedmineSubtaskListAccordion::Patches::IssuesHelperPatch
   end
-#end
+end
 
 Redmine::Plugin.register :redmine_subtask_list_accordion do
   name 'Redmine Subtask List Accordion plugin'
